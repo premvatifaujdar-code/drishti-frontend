@@ -1,42 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
   <title>🔥 Drishti Firebase Login</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input, button, textarea { width: 100%; margin: 6px 0; padding: 8px; }
-    button { cursor: pointer; }
-    pre { background: #f4f4f4; padding: 10px; }
-  </style>
 </head>
 
 <body>
   <h2>🔥 Drishti Firebase Login</h2>
 
-  <input id="email" type="email" placeholder="Email" />
-  <input id="password" type="password" placeholder="Password" />
+  <input id="email" type="email" placeholder="Email" /><br><br>
+  <input id="password" type="password" placeholder="Password" /><br><br>
 
   <button onclick="login()">Login & Get ID Token</button>
 
   <h3>ID TOKEN</h3>
-  <textarea id="tokenBox" rows="8" placeholder="Login ke baad ID token yahan aayega"></textarea>
+  <textarea id="tokenBox" rows="8" cols="80"></textarea><br><br>
 
   <button onclick="verifyToken()">Verify Token</button>
   <button onclick="createUser()">Create User (Firestore)</button>
   <button onclick="currentUser()">Current User (Firestore)</button>
 
   <h3>RESULT</h3>
-  <pre id="result">---</pre>
+  <pre id="result"></pre>
 
-  <!-- 🔥 Firebase v9 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-    /* ===============================
-       🔥 FIREBASE CONFIG (FINAL)
-       =============================== */
+    // 🔥 Firebase config (correct)
     const firebaseConfig = {
       apiKey: "AIzaSyB1fEntfaINpsA8AZCMGBo5AcMOGSSAqpQ",
       authDomain: "drishti-705e0.firebaseapp.com",
@@ -48,28 +39,24 @@
 
     const BACKEND = "https://drishti-backend-one.vercel.app";
 
-    /* ===============================
-       🔐 LOGIN
-       =============================== */
-    window.login = async function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
+    // 🔐 LOGIN
+    window.login = async () => {
       try {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        const token = await cred.user.getIdToken();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        const token = await userCred.user.getIdToken();
 
         document.getElementById("tokenBox").value = token;
         document.getElementById("result").textContent = "✅ Login successful";
       } catch (err) {
-        document.getElementById("result").textContent = "❌ " + err.message;
+        document.getElementById("result").textContent = err.message;
       }
     };
 
-    /* ===============================
-       🔎 VERIFY TOKEN
-       =============================== */
-    window.verifyToken = async function () {
+    // ✅ VERIFY TOKEN (GET)
+    window.verifyToken = async () => {
       const token = document.getElementById("tokenBox").value;
 
       try {
@@ -88,10 +75,8 @@
       }
     };
 
-    /* ===============================
-       🗄️ CREATE USER (Firestore)
-       =============================== */
-    window.createUser = async function () {
+    // 🗄️ CREATE USER (🔥 MUST BE POST)
+    window.createUser = async () => {
       const token = document.getElementById("tokenBox").value;
 
       try {
@@ -99,7 +84,9 @@
           method: "POST",
           headers: {
             Authorization: "Bearer " + token,
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({}),
         });
 
         const data = await res.json();
@@ -110,14 +97,12 @@
       }
     };
 
-    /* ===============================
-       👤 CURRENT USER (Firestore)
-       =============================== */
-    window.currentUser = async function () {
+    // 👤 CURRENT USER (GET)
+    window.currentUser = async () => {
       const token = document.getElementById("tokenBox").value;
 
       try {
-        const res = await fetch(`${BACKEND}/api/user/me`, {
+        const res = await fetch(`${BACKEND}/api/auth/me`, {
           method: "GET",
           headers: {
             Authorization: "Bearer " + token,
