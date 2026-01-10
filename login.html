@@ -65,31 +65,7 @@ window.syncUser = () =>
     };
 
     // ================= COMMON API CALL =================
-  async function callAPI(url, method, body = null) {
-  if (!ID_TOKEN) {
-    document.getElementById("result").textContent =
-      "❌ Login first";
-    return;
-  }
-
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Authorization": "Bearer " + ID_TOKEN,
-        "Content-Type": "application/json"
-      },
-      body: body ? JSON.stringify(body) : null
-    });
-
-    const data = await res.json();
-    document.getElementById("result").textContent =
-      JSON.stringify(data, null, 2);
-  } catch (err) {
-    document.getElementById("result").textContent =
-      "❌ Backend error";
-  }
-                         }
+  
     
     
     
@@ -119,16 +95,7 @@ window.syncUser = () =>
     }
 
     // ================= BUTTON FUNCTIONS =================
-  window.createPost = async () => {
-  const title = "Hello Drishti";
-  const content = "My first protected post";
-
-  await callAPI(
-    "https://drishti-backend-one.vercel.app/api/posts/create",
-    "POST",
-    { title, content }
-  );
-};
+  
     
     
     window.verifyToken = () =>
