@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Drishti Login</title>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+
+<body>
+  <h2>🔥 Drishti Firebase Login</h2>
+
+  <input id="email" type="email" placeholder="Email" />
+  <br /><br />
+  <input id="password" type="password" placeholder="Password" />
+  <br /><br />
+
+  <button onclick="login()">Login & Get ID Token</button>
+
+  <h3>ID TOKEN</h3>
+  <textarea id="tokenBox" rows="8" cols="60"></textarea>
+
+  <br /><br />
+  <button onclick="verifyToken()">Verify Token (Backend)</button>
+
+  <h3>VERIFY RESULT</h3>
+  <pre id="verifyResult"></pre>
+
+  <script>
+    /* ==============================
+       🔥 FIREBASE CONFIG (FINAL)
+       ============================== */
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1fEntfaINpsA8AZCMGBo5AcMOGSSAqpQ",
+      authDomain: "drishti-705e0.firebaseapp.com",
+      projectId: "drishti-705e0"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    /* ==============================
+       🔐 LOGIN + GET ID TOKEN
+       ============================== */
+    async function login() {
+      try {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        const userCred = await auth.signInWithEmailAndPassword(email, password);
+        const token = await userCred.user.getIdToken();
+
+        document.getElementById("tokenBox").value = token;
+        alert("Login successful, token generated");
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    /* ==============================
+       🛡️ VERIFY TOKEN (BACKEND)
+       ============================== */
+    async function verifyToken() {
+      try {
+        const token = document.getElementById("tokenBox").value;
+
+        const res = await fetch(
+          "https://d-one.vercel.app/api/auth/verify",
+          {
+            method: "POST",
+            headers: {
+              "Authorization": "Bearer " + token
+            }
+          }
+        );
+
+        const data = await res.json();
+        document.getElementById("verifyResult").innerText =
+          JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("verifyResult").innerText = err.message;
+      }
+    }
+  </script>
+</body>
+</html>
