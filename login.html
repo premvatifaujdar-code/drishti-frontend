@@ -38,21 +38,23 @@ const auth = getAuth(app);
 
 let ID_TOKEN = "";
 
+// ✅ LOGIN
 window.login = async () => {
   try {
-    const email = email.value;
-    const password = password.value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
     const cred = await signInWithEmailAndPassword(auth, email, password);
     ID_TOKEN = await cred.user.getIdToken();
 
-    tokenBox.value = ID_TOKEN;
-    result.textContent = "✅ Login successful";
+    document.getElementById("tokenBox").value = ID_TOKEN;
+    document.getElementById("result").textContent = "✅ Login successful";
   } catch (e) {
-    result.textContent = e.message;
+    document.getElementById("result").textContent = "❌ " + e.message;
   }
 };
 
+// 🔁 COMMON API CALL
 async function callAPI(url, method) {
   const res = await fetch(url, {
     method,
@@ -60,10 +62,13 @@ async function callAPI(url, method) {
       Authorization: "Bearer " + ID_TOKEN
     }
   });
+
   const data = await res.json();
-  result.textContent = JSON.stringify(data, null, 2);
+  document.getElementById("result").textContent =
+    JSON.stringify(data, null, 2);
 }
 
+// 🔐 BACKEND CALLS
 window.verify = () =>
   callAPI("https://drishti-backend-one.vercel.app/api/auth/verify", "GET");
 
@@ -72,7 +77,7 @@ window.createUser = () =>
 
 window.currentUser = () =>
   callAPI("https://drishti-backend-one.vercel.app/api/auth/me", "GET");
-
 </script>
+
 </body>
 </html>
