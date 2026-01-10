@@ -24,6 +24,10 @@
 
 <hr>
 
+
+<button onclick="getMyPosts()">Get My Posts</button>
+
+  
 <button onclick="verifyToken()">Verify Token</button>
 <button onclick="syncUser()">Sync User (Firestore)</button>
 <button onclick="createPost()">Create Protected Post</button>
@@ -95,6 +99,35 @@ async function callAPI(url, method, body = null) {
 }
 
 /* ================= STEP-4 APIs ================= */
+
+window.getMyPosts = async () => {
+  if (!ID_TOKEN) {
+    document.getElementById("result").textContent =
+      "❌ Login first";
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      "https://drishti-backend-one.vercel.app/api/creator/post/my",
+      {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + ID_TOKEN,
+        }
+      }
+    );
+
+    const data = await res.json();
+    document.getElementById("result").textContent =
+      JSON.stringify(data, null, 2);
+  } catch (err) {
+    document.getElementById("result").textContent =
+      "❌ Error fetching posts";
+  }
+};
+
+  
 window.verifyToken = () =>
   callAPI(
     "https://drishti-backend-one.vercel.app/api/auth/verify",
