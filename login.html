@@ -91,6 +91,18 @@ window.syncUser = () =>
     }
 
     // ================= BUTTON FUNCTIONS =================
+  window.createPost = async () => {
+  const title = "Hello Drishti";
+  const content = "My first protected post";
+
+  await callAPI(
+    "https://drishti-backend-one.vercel.app/api/posts/create",
+    "POST",
+    { title, content }
+  );
+};
+    
+    
     window.verifyToken = () =>
       callAPI(
         "https://drishti-backend-one.vercel.app/api/auth/verify",
