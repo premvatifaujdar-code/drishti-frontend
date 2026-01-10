@@ -16,6 +16,7 @@
   <h3>ID TOKEN</h3>
   <textarea id="tokenBox" rows="8" cols="80"></textarea><br><br>
 
+  <button onclick="syncUser()">Sync User (Firestore)</button>
   <button onclick="verifyToken()">Verify Token</button>
   <button onclick="createUser()">Create User</button>
   <button onclick="currentUser()">Current User</button>
@@ -42,6 +43,12 @@
     let ID_TOKEN = "";
 
     // ================= LOGIN =================
+window.syncUser = () =>
+  callAPI(
+    "https://drishti-backend-one.vercel.app/api/user/sync",
+    "POST"
+  );
+    
     window.login = async () => {
       try {
         const email = document.getElementById("email").value;
