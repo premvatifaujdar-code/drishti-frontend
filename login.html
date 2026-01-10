@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>🔥 Drishti Firebase Login</title>
 </head>
 <body>
@@ -14,14 +14,14 @@
 <button onclick="login()">Login & Get ID Token</button>
 
 <h3>ID TOKEN</h3>
-<textarea id="tokenBox" rows="6" cols="80"></textarea><br><br>
+<textarea id="tokenBox" rows="6" cols="80" readonly></textarea><br><br>
 
 <button onclick="verifyToken()">Verify Token</button>
 <button onclick="createUser()">Create User (Firestore)</button>
 <button onclick="currentUser()">Current User</button>
 
 <h3>RESULT</h3>
-<pre id="result"></pre>
+<pre id="result">---</pre>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -38,6 +38,11 @@ const auth = getAuth(app);
 
 let TOKEN = "";
 
+function show(msg) {
+  document.getElementById("result").textContent = msg;
+}
+
+// 🔐 LOGIN
 window.login = async () => {
   try {
     const email = document.getElementById("email").value;
@@ -47,43 +52,73 @@ window.login = async () => {
     TOKEN = await cred.user.getIdToken();
 
     document.getElementById("tokenBox").value = TOKEN;
-    show("✅ Login successful");
+    show("✅ Login successful\nToken generated");
   } catch (e) {
-    show("❌ " + e.message);
+    show("❌ Login error:\n" + e.message);
   }
 };
 
-async function call(url, method) {
+// 🚫 TOKEN GUARD
+function ensureToken() {
+  if (!TOKEN) {
+    show("❌ Please login first (Token missing)");
+    return false;
+  }
+  return true;
+}
+
+// 🔁 FETCH HELPER
+async function callAPI(url, method) {
   const res = await fetch(url, {
     method,
     headers: {
-      Authorization: "Bearer " + TOKEN
+      "Authorization": "Bearer " + TOKEN
     }
   });
   return res.json();
 }
 
+// ✅ VERIFY
 window.verifyToken = async () => {
-  show(JSON.stringify(
-    await call("https://drishti-backend-one.vercel.app/api/auth/verify","GET"),
-    null,2));
+  if (!ensureToken()) return;
+  try {
+    const data = await callAPI(
+      "https://drishti-backend-one.vercel.app/api/auth/verify",
+      "GET"
+    );
+    show(JSON.stringify(data, null, 2));
+  } catch (e) {
+    show("❌ Verify error");
+  }
 };
 
+// ✅ CREATE USER
 window.createUser = async () => {
-  show(JSON.stringify(
-    await call("https://drishti-backend-one.vercel.app/api/user/create","POST"),
-    null,2));
+  if (!ensureToken()) return;
+  try {
+    const data = await callAPI(
+      "https://drishti-backend-one.vercel.app/api/user/create",
+      "POST"
+    );
+    show(JSON.stringify(data, null, 2));
+  } catch (e) {
+    show("❌ Create user error");
+  }
 };
 
+// ✅ CURRENT USER
 window.currentUser = async () => {
-  show(JSON.stringify(
-    await call("https://drishti-backend-one.vercel.app/api/auth/me","GET"),
-    null,2));
+  if (!ensureToken()) return;
+  try {
+    const data = await callAPI(
+      "https://drishti-backend-one.vercel.app/api/auth/me",
+      "GET"
+    );
+    show(JSON.stringify(data, null, 2));
+  } catch (e) {
+    show("❌ Current user error");
+  }
 };
-
-function show(msg){
-  document.getElementById("result").textContent = msg;
-}
 </script>
 
 </body>
