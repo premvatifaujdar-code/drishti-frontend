@@ -3,169 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <title>🔥 Drishti Firebase Login</title>
-
-  <!-- Firebase v8 CDN (simple & stable) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-
-  <style>
-    body {
-      font-family: Arial;
-      padding: 20px;
-    }
-    input, button, textarea {
-      width: 100%;
-      margin: 6px 0;
-      padding: 8px;
-    }
-    textarea {
-      height: 120px;
-    }
-    .box {
-      border: 1px solid #ccc;
-      padding: 15px;
-      margin-top: 15px;
-    }
-  </style>
 </head>
 
 <body>
+  <h2>🔥 Drishti Firebase Login</h2>
 
-<h2>🔥 Drishti Firebase Login</h2>
+  <input id="email" type="email" placeholder="Email" /><br><br>
+  <input id="password" type="password" placeholder="Password" /><br><br>
 
-<input id="email" type="email" placeholder="Email" />
-<input id="password" type="password" placeholder="Password" />
+  <button onclick="login()">Login & Get ID Token</button>
 
-<button onclick="login()">Login & Get ID Token</button>
-
-<div class="box">
   <h3>ID TOKEN</h3>
-  <textarea id="tokenBox" placeholder="Login ke baad ID Token yahan aayega"></textarea>
-</div>
+  <textarea id="tokenBox" rows="8" cols="80"></textarea><br><br>
 
-<button onclick="verifyToken()">Verify Token (Backend)</button>
-<button onclick="createUser()">Create User (Backend)</button>
-<button onclick="currentUser()">Current User (Backend)</button>
+  <button onclick="verifyToken()">Verify Token (Backend)</button>
 
-<div class="box">
   <h3>RESULT</h3>
   <pre id="result"></pre>
-</div>
 
-<script>
-  /* ================================
-     🔥 FIREBASE CONFIG (REPLACE ONLY VALUES)
-  =================================== */
+  <!-- ✅ FIREBASE v9 ONLY -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB1fEntfaINpsA8AZCMGBo5AcMOGSSAqpQ",
-    authDomain: "drishti-705e0.firebaseapp.com",
-    projectId: "drishti-705e0"
-  };
+    // 🔥 EXACT CONFIG (NO CHANGE)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1fEntfaINpsA8AZCMGBo5AcMOGSSAqpQ",
+      authDomain: "drishti-705e0.firebaseapp.com",
+      projectId: "drishti-705e0"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-  /* ================================
-     LOGIN + GET ID TOKEN
-  =================================== */
-  async function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    // 🔐 LOGIN FUNCTION
+    window.login = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-    if (!email || !password) {
-      alert("Email & Password required");
-      return;
-    }
+      try {
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        const token = await userCred.user.getIdToken();
 
-    try {
-      const userCred = await auth.signInWithEmailAndPassword(email, password);
-      const token = await userCred.user.getIdToken();
+        document.getElementById("tokenBox").value = token;
+        document.getElementById("result").textContent = "✅ Login successful";
+      } catch (err) {
+        document.getElementById("result").textContent = "❌ " + err.message;
+      }
+    };
 
-      document.getElementById("tokenBox").value = token;
-      document.getElementById("result").innerText = "✅ Login success";
+    // 🔎 VERIFY BACKEND
+    window.verifyToken = async function () {
+      const token = document.getElementById("tokenBox").value;
 
-    } catch (err) {
-      document.getElementById("result").innerText = err.message;
-    }
-  }
-
-  /* ================================
-     VERIFY TOKEN API
-  =================================== */
-  async function verifyToken() {
-    const token = document.getElementById("tokenBox").value;
-
-    try {
-      const res = await fetch(
-        "https://drishti-backend-one.vercel.app/api/auth/verify",
-        {
-          headers: {
-            "Authorization": "Bearer " + token
+      try {
+        const res = await fetch(
+          "https://drishti-backend-one.vercel.app/api/auth/verify",
+          {
+            method: "GET",
+            headers: {
+              "Authorization": "Bearer " + token
+            }
           }
-        }
-      );
+        );
 
-      const data = await res.json();
-      document.getElementById("result").innerText =
-        JSON.stringify(data, null, 2);
-
-    } catch (err) {
-      document.getElementById("result").innerText = "❌ Failed to fetch";
-    }
-  }
-
-  /* ================================
-     CREATE USER API
-  =================================== */
-  async function createUser() {
-    const token = document.getElementById("tokenBox").value;
-
-    try {
-      const res = await fetch(
-        "https://drishti-backend-one.vercel.app/api/auth/create",
-        {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + token
-          }
-        }
-      );
-
-      const data = await res.json();
-      document.getElementById("result").innerText =
-        JSON.stringify(data, null, 2);
-
-    } catch (err) {
-      document.getElementById("result").innerText = "❌ Failed to fetch";
-    }
-  }
-
-  /* ================================
-     CURRENT USER API
-  =================================== */
-  async function currentUser() {
-    const token = document.getElementById("tokenBox").value;
-
-    try {
-      const res = await fetch(
-        "https://drishti-backend-one.vercel.app/api/auth/me",
-        {
-          headers: {
-            "Authorization": "Bearer " + token
-          }
-        }
-      );
-
-      const data = await res.json();
-      document.getElementById("result").innerText =
-        JSON.stringify(data, null, 2);
-
-    } catch (err) {
-      document.getElementById("result").innerText = "❌ Failed to fetch";
-    }
-  }
-</script>
-
+        const data = await res.json();
+        document.getElementById("result").textContent =
+          JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("result").textContent =
+          "❌ Backend error";
+      }
+    };
+  </script>
 </body>
 </html>
